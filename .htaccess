@@ -1,0 +1,14 @@
+<Files userdb>
+Order Deny,allow
+Deny from all
+</Files>
+<Files cache>
+Order Deny,allow
+Deny from all
+</Files>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^u/([^/]+)/([^/]+) tw.php?user=$1&timeline=$2 [L,QSA]
+RewriteRule ^u/([^/]+) tw.php?user=$1 [L,QSA]
+RewriteRule ^t/(.*) img.php?twid=$1 [L,QSA]
+RewriteRule ^twitpic/(.*) twitpic.php?p=$1 [L,QSA]

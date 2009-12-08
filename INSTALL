@@ -1,0 +1,20 @@
+REQUIREMENT
+1. Apache webserver
+  1.1 mod_rewrite
+2. PHP 5.1
+  2.1 GD
+  2.2 curl
+  2.3 JSON
+3. Nintendo DS
+  3.1 Nintendo DS Browser
+  3.2 RAM Extension Pack (tested with EZ Flash 3-in-1 Plus)
+
+INSTALL
+0. Upload
+1. Create a file named cache and userdb. Both file have no extensions 
+and must be writable by the web server
+2. Go to /list.php
+3. Add a new OAuth account. Note that DSTwitt use desktop authentication 
+because Twitter require fixed endpoint and this isn't possible with 
+decentralized application like this.
+4. Bookmark the URL on your DS.
