@@ -60,7 +60,7 @@ foreach($tweet->status as $v){
 		break;
 	}
 }
-$text = $t->user->screen_name.' '.$t->text;
+$text = $t->text;
 
 // look for cached copy, send if it exists
 $hash = md5(basename($font_file) . $font_size . $font_color .
