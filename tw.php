@@ -23,7 +23,7 @@ span{font-size:15pt;}
 form{padding:0; margin:0;}
 </style>
 <style media="screen">
-#r{float:right;}
+#r{float: none;}
 .ssronly{display: none;}
 .deskonly{display: inline;}
 </style>
@@ -40,6 +40,10 @@ function t(u,i){
 	e=document.getElementById("irp");
 	e.value = i;
 }
+function ut(u){
+	document.getElementById("tweet").value = u;
+	document.getElementById("utl").click();
+}
 </script>
 <title>DSTwitt</title>
 <div id="r"><span>@<?=$user?></span> | <a href="/u/<?=$user?>?rnd=<?=uniqid()?>">Home</a> | <a href="/u/<?=$user?>/replies?rnd=<?=uniqid()?>">Replies</a>
@@ -49,7 +53,8 @@ function t(u,i){
 <form action="<?=$fnpath?>" method="post">
 	<input type='text' name='tweet' value='<?=$tweetText?>' id="tweet" /> 
 	<input type='hidden' name='irp' id='irp' />
-	<input type='submit' value='Tweet' />
+	<input type='submit' name='act' value='Tweet' />
+	<input type='submit' name='act' value='User timeline' id='utl' />
 </form>
 <ul>
 <?php
@@ -58,7 +63,7 @@ $tw = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, $_user[$user]->oauth_token
 if($_GET['rt']){
 	$out = $tw->post("statuses/retweet/".$_GET['rt'], array());
 }
-if($_POST['tweet']){
+if($_POST['tweet'] && $_POST['act'] == "Tweet"){
 	$in = array("status" => $_POST['tweet']);
 	if($_POST['irp']) $in['in_reply_to_status_id'] = $_POST['irp'];
 	$out = $tw->post("statuses/update", $in);
@@ -67,10 +72,12 @@ if($_POST['tweet']){
 // (of course I edited img.php. Also, the earlier version of DSTwitt that use saved password
 // use the old API and it put everything into the status key
 if(!$_GET['norefresh']){
-	if($_GET['timeline'] == "replies"){
-		$tweet = (object) array("status" => $tw->get("statuses/mentions", array("count" => 11)));
+	if($_POST['act'] == "User timeline"){
+		$tweet = (object) array("status" => $tw->get("statuses/user_timeline", array("count" => 13, "screen_name" => $_POST['tweet'])));
+	}else if($_GET['timeline'] == "replies"){
+		$tweet = (object) array("status" => $tw->get("statuses/mentions", array("count" => 13)));
 	}else{
-		$tweet = (object) array("status" => $tw->get("statuses/home_timeline", array("count" => 11)));
+		$tweet = (object) array("status" => $tw->get("statuses/home_timeline", array("count" => 13)));
 	}
 }else{
 	$tweet = json_decode(file_get_contents("cache"));
@@ -79,6 +86,7 @@ file_put_contents("cache", json_encode((array) $tweet));
 foreach($tweet->status as $t){
 	print '<li><a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
 	print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
+	print '<a href="#" onclick="ut(\''.$t->user->screen_name.'\'); return false;"><button>TL</button></a>';
 	if(preg_match("~http://twitpic.com/([^ ]+)~", $t->text, $twtpic)){
 		print "<a href='/twitpic/".$twtpic[1]."'>";
 	}
