@@ -12,6 +12,7 @@ if (strpos($fnpath, "?") !== false) $fnpath = reset(explode("?", $fnpath));
 if($_GET['ssr'] == "true") $_SESSION['ssr'] = true;
 else if($_GET['ssr'] == "false") $_SESSION['ssr'] = false;
 php?>
+<script src="../sizzle.js"></script>
 <style>
 body{font-family: sans-serif;}
 .g{color:gray;}
@@ -26,23 +27,31 @@ form{padding:0; margin:0;}
 #r{float: none;}
 .ssronly{display: none;}
 .deskonly{display: inline;}
+.actionbar{display: none;}
 </style>
 <style media="handheld">
 #r{float: none;}
 .ssronly{display: inline;}
 .deskonly{display: none;}
+.actionbar{display: block;}
 </style>
 <script>
+var $ = Sizzle;
 function t(u,i){
-	e=document.getElementById("tweet");
+	e=$("#tweet")[0];
 	e.value = "@"+u+" ";
 	e.focus();
-	e=document.getElementById("irp");
+	e=$("#irp")[0];
 	e.value = i;
 }
 function ut(u){
-	document.getElementById("tweet").value = u;
-	document.getElementById("utl").click();
+	$("#tweet")[0].value = u;
+	$("#utl")[0].click();
+}
+function actbar(e){
+	e=$(".actionbar", e)[0];
+	if(e.style.display == "block") e.style.display = "none";
+	else e.style.display = "block";
 }
 </script>
 <title>DSTwitt</title>
@@ -84,12 +93,7 @@ if(!$_GET['norefresh']){
 }
 file_put_contents("cache", json_encode((array) $tweet));
 foreach($tweet->status as $t){
-	print '<li><a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
-	print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
-	print '<a href="#" onclick="ut(\''.$t->user->screen_name.'\'); return false;"><button>TL</button></a>';
-	if(preg_match("~http://twitpic.com/([^ ]+)~", $t->text, $twtpic)){
-		print "<a href='/twitpic/".$twtpic[1]."'>";
-	}
+	print '<li onclick="actbar(this);">';
 	if($_SESSION['ssr']){
 		$client = strip_tags($t->source);
 		$ti = date("g:i:s A", strtotime($t->created_at));
@@ -97,8 +101,13 @@ foreach($tweet->status as $t){
 	}else{
 		print '<img src="/t/'.$t->id.'" />';
 	}
-	if($twtpic) print "</a>";
-	print '</li>';
+	echo '<div class="actionbar"><a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
+	print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
+	print '<a href="#" onclick="ut(\''.$t->user->screen_name.'\'); return false;"><button>TL</button></a>';
+	if(preg_match("~http://twitpic.com/([^ ]+)~", $t->text, $twtpic)){
+		print " <a href='/twitpic/".$twtpic[1]."'>TwitPic</a> ";
+	}
+	print '</div></li>';
 	flush();
 }
 php?>
