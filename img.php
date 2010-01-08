@@ -60,9 +60,7 @@ foreach($tweet->status as $v){
 		break;
 	}
 }
-$client = strip_tags($t->source);
-$ti = date("g:i:s A", strtotime($t->created_at));
-$text = $t->user->screen_name.' '.$t->text.' ('.$ti.' | '.$client.')';
+$text = $t->user->screen_name.' '.$t->text;
 
 // look for cached copy, send if it exists
 $hash = md5(basename($font_file) . $font_size . $font_color .

@@ -18,7 +18,7 @@ body{font-family: sans-serif;}
 .g{color:gray;}
 .t{font-size: 90%;}
 ul{padding:0; margin:0; margin-top: 10px;}
-li{border-bottom: black solid 1px;}
+li{border-bottom: black solid 1px; min-height: 24px;}
 a{text-decoration:none;}
 span{font-size:15pt;}
 form{padding:0; margin:0;}
@@ -82,11 +82,11 @@ if($_POST['tweet'] && $_POST['act'] == "Tweet"){
 // use the old API and it put everything into the status key
 if(!$_GET['norefresh']){
 	if($_POST['act'] == "User timeline"){
-		$tweet = (object) array("status" => $tw->get("statuses/user_timeline", array("count" => 13, "screen_name" => $_POST['tweet'])));
+		$tweet = (object) array("status" => $tw->get("statuses/user_timeline", array("count" => 20, "screen_name" => $_POST['tweet'])));
 	}else if($_GET['timeline'] == "replies"){
-		$tweet = (object) array("status" => $tw->get("statuses/mentions", array("count" => 13)));
+		$tweet = (object) array("status" => $tw->get("statuses/mentions", array("count" => 20)));
 	}else{
-		$tweet = (object) array("status" => $tw->get("statuses/home_timeline", array("count" => 13)));
+		$tweet = (object) array("status" => $tw->get("statuses/home_timeline", array("count" => 20)));
 	}
 }else{
 	$tweet = json_decode(file_get_contents("cache"));
@@ -99,7 +99,9 @@ foreach($tweet->status as $t){
 		$ti = date("g:i:s A", strtotime($t->created_at));
 		print $t->user->screen_name.' '.$t->text.' ('.$ti.' | '.$client.')';
 	}else{
-		print '<img src="/t/'.$t->id.'" />';
+		$client = strip_tags($t->source);
+		$ti = date("g:i:s A", strtotime($t->created_at));
+		print '<img src="/t/'.$t->id.'" />  ('.$ti.' | '.$client.')';
 	}
 	echo '<div class="actionbar"><a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
 	print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
