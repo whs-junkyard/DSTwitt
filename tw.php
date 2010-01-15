@@ -11,6 +11,9 @@ $fnpath = basename($_SERVER['REQUEST_URI']);
 if (strpos($fnpath, "?") !== false) $fnpath = reset(explode("?", $fnpath));
 if($_GET['ssr'] == "true") $_SESSION['ssr'] = true;
 else if($_GET['ssr'] == "false") $_SESSION['ssr'] = false;
+$oldtweet = json_decode(file_get_contents("cache"));
+$lastupdate = $oldtweet->status;
+$lastupdate = $lastupdate[0];
 php?>
 <script src="../sizzle.js"></script>
 <style>
@@ -55,7 +58,7 @@ function actbar(e){
 }
 </script>
 <title>DSTwitt</title>
-<div id="r"><span>@<?=$user?></span> | <a href="/u/<?=$user?>?rnd=<?=uniqid()?>">Home</a> | <a href="/u/<?=$user?>/replies?rnd=<?=uniqid()?>">Replies</a>
+<div id="r"><span>@<?=$user?></span> | <a href="/u/<?=$user?>?rnd=<?=uniqid()?>">Home</a> | <a href="/u/<?=$user?>/replies?rnd=<?=uniqid()?>">Mentions</a>
 	<?php if(!$_SESSION['ssr']){ ?><span class="ssronly"> | <a href='/u/<?=$user?>?norefresh=true&ssr=true'>Text-only mode</a></span><?php } ?>
 	<?php if($_SESSION['ssr']){ ?><span class="deskonly"> | <a href='/u/<?=$user?>?norefresh=true&ssr=false'>Image mode</a></span><?php } ?>
  | <?=date("g:i:s A")?></div>
@@ -94,6 +97,7 @@ if(!$_GET['norefresh']){
 file_put_contents("cache", json_encode((array) $tweet));
 foreach($tweet->status as $t){
 	print '<li onclick="actbar(this);">';
+	if($t->id == $lastupdate->id) print "<b>&gt;&gt;&gt;</b> ";
 	if($_SESSION['ssr']){
 		$client = strip_tags($t->source);
 		$ti = date("g:i:s A", strtotime($t->created_at));
