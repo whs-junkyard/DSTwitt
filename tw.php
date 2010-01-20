@@ -94,13 +94,13 @@ if($_POST['tweet'] && $_POST['act'] == "Tweet"){
 // use the old API and it put everything into the status key
 if(!$_GET['norefresh']){
 	if($_POST['act'] == "User timeline"){
-		$tweet = (object) array("status" => $tw->get("statuses/user_timeline", array("count" => 15, "screen_name" => $_POST['tweet'])));
+		$tweet = (object) array("status" => $tw->get("statuses/user_timeline", array("count" => 20, "screen_name" => $_POST['tweet'])));
 	}else if($_GET['timeline'] == "replies"){
 		$tweet = (object) array("status" => $tw->get("statuses/mentions", array("count" => 20)));
 	}else if($_GET['timeline'] == "fav"){
 		$tweet = (object) array("status" => $tw->get("favorites", array()));
 	}else{
-		$tweet = (object) array("status" => $tw->get("statuses/home_timeline", array("count" => 15)));
+		$tweet = (object) array("status" => $tw->get("statuses/home_timeline", array("count" => 20)));
 	}
 }else{
 	$tweet = json_decode(file_get_contents("cache"));

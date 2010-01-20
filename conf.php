@@ -6,7 +6,7 @@ $_conf['blockedclients'] = array(
 	"foursquare"
 );
 $_conf['hideuser'] = array();
-$_conf['display'] = 10; //max = 15
+$_conf['display'] = 10; //max = 20
 
 // users parser
 $_user = (array) json_decode(file_get_contents("userdb"));
