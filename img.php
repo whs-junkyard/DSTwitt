@@ -15,7 +15,7 @@
 */
 
 
-$font_file  = 'lucida.ttf' ;
+$font_file  = './lucida.ttf' ;
 $font_size  = 11 ;
 $font_color = '#000000' ;
 $background_color = '#ffffff' ;
