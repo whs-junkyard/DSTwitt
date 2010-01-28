@@ -159,9 +159,9 @@ if(!$tweet->status){
 		if($clientdb[$client]) $client .= " on <b>".$clientdb[$client]."</b>";
 		$ti = date("g:i:s A", strtotime($t->created_at));
 		if($_SESSION['ssr']){
-			print '<b>'.$t->user->screen_name.'</b> '.$t->text.' ('.$ti.' | '.$client.')';
+			print '<b>'.$t->user->screen_name.'</b> '.$t->text;
 		}else{
-			print '<b>'.$t->user->screen_name.'</b> <img src="/t/'.$t->id.'" />  ('.$ti.' | '.$client.')';
+			print '<b>'.$t->user->screen_name.'</b> <img src="/t/'.$t->id.'" />';
 		}
 		echo '<div class="actionbar">';
 		if($t->user->id){
@@ -172,6 +172,7 @@ if(!$tweet->status){
 			if($t->favorited) print '<a href="'.$fnpath.'?unfav='.$t->id.'"><button><b>Faved</b></button></a>';
 			else print '<a href="'.$fnpath.'?fav='.$t->id.'"><button>Fave</button></a>';
 		}
+		print $ti.' | '.$client;
 		if(preg_match("~http://twitpic.com/([^ ]+)~", $t->text, $twtpic)){
 			print " <a href='/twitpic/".$twtpic[1]."'>TwitPic</a> ";
 		}
