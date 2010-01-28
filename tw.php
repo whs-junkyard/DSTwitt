@@ -11,7 +11,9 @@ $fnpath = basename($_SERVER['REQUEST_URI']);
 if (strpos($fnpath, "?") !== false) $fnpath = reset(explode("?", $fnpath));
 if($_GET['ssr'] == "true") $_SESSION['ssr'] = true;
 else if($_GET['ssr'] == "false") $_SESSION['ssr'] = false;
-$oldtweet = json_decode(file_get_contents("cache"));
+try{
+	$oldtweet = json_decode(file_get_contents("cache"));
+}catch(Exception $e){$oldtweet = array();}
 $lastupdate = $oldtweet->status;
 $lastupdate = $lastupdate[0];
 php?>
@@ -51,13 +53,16 @@ function ut(u){
 	$("#tweet")[0].value = u;
 	$("#utl")[0].click();
 }
+function se(u){
+	$("#tweet")[0].value = u;
+}
 function actbar(e){
 	e=$(".actionbar", e)[0];
 	if(e.style.display == "block") e.style.display = "none";
 	else e.style.display = "block";
 }
 </script>
-<title>DSTwitt</title>
+<title>@<?=$user?> | DSTwitt</title>
 <div id="r"><span>@<?=$user?></span> | <a href="/u/<?=$user?>?rnd=<?=uniqid()?>">Home</a> | <a href="/u/<?=$user?>/replies?rnd=<?=uniqid()?>">Mentions</a> | <a href="/u/<?=$user?>/fav?rnd=<?=uniqid()?>">Favourite</a>
 	<?php if(!$_SESSION['ssr']){ ?><span class="ssronly"> | <a href='/u/<?=$user?>?norefresh=true&ssr=true'>Text-only mode</a></span><?php } ?>
 	<?php if($_SESSION['ssr']){ ?><span class="deskonly"> | <a href='/u/<?=$user?>?norefresh=true&ssr=false'>Image mode</a></span><?php } ?>
@@ -67,6 +72,7 @@ function actbar(e){
 	<input type='hidden' name='irp' id='irp' />
 	<input type='submit' name='act' value='Tweet' />
 	<input type='submit' name='act' value='User timeline' id='utl' />
+	<input type='submit' name='act' value='Search' id='search' />
 </form>
 <ul>
 <?php
@@ -92,25 +98,49 @@ if($_POST['tweet'] && $_POST['act'] == "Tweet"){
 // img.php seems to malfunction without status object.
 // (of course I edited img.php. Also, the earlier version of DSTwitt that use saved password
 // use the old API and it put everything into the status key
-$nocaching = false;
 if(!$_GET['norefresh']){
 	if($_POST['act'] == "User timeline"){
 		$tweet = (object) array("status" => $tw->get("statuses/user_timeline", array("count" => 20, "screen_name" => $_POST['tweet'])));
-		$nocaching = true;
+		$tlname = "@".htmlspecialchars($_POST['tweet']);
+	}else if($_POST['act'] == "Search"){
+		$_data = json_decode($tw->http("http://search.twitter.com/search.json?q=".urlencode($_POST['tweet'])."&rpp=20", "GET"));
+		$rtd = array();
+		foreach($_data->results as $t){
+			$c = count($rtd);
+			$rtd[$c]['source'] = html_entity_decode($t->source);
+			$rtd[$c]['favorited'] = false;
+			$rtd[$c]['id'] = $t->id;
+			$rtd[$c]['text'] = $t->text;
+			$rtd[$c]['created_at'] = $t->created_at;
+			$rtd[$c]['user']['screen_name'] = $t->from_user;
+			$rtd[$c]['user'] = (object) $rtd[$c]['user'];
+			$rtd[$c] = (object) $rtd[$c];
+		}
+		$tweet = (object) array("status" => $rtd);
+		$tlname = "Search for ".htmlspecialchars($_POST['tweet']);
 	}else if($_GET['timeline'] == "replies"){
 		$tweet = (object) array("status" => $tw->get("statuses/mentions", array("count" => 20)));
+		$tlname = "Replies";
 	}else if($_GET['timeline'] == "fav"){
 		$tweet = (object) array("status" => $tw->get("favorites", array()));
+		$tlname = "Favourites";
 	}else{
 		$tweet = (object) array("status" => $tw->get("statuses/home_timeline", array("count" => 20)));
+		$tlname = "Home";
 	}
 }else{
 	$tweet = json_decode(file_get_contents("cache"));
 }
-if(!$nocaching)
-	file_put_contents("cache", json_encode((array) $tweet));
+file_put_contents("cache", json_encode((array) $tweet));
+print "<b>".$tlname."</b>";
 if(!$tweet->status){
-	print "No data received. Did the username \"<b>".$_POST['tweet']."</b>\" correct?<br />Bug? Report at <a href='https://bugs.launchpad.net/dstwitt'>https://bugs.launchpad.net/dstwitt</a>";
+	if($_POST['act'] == "User timeline")
+		$kind = "username";
+	else if($_POST['act'] == "Search")
+		$kind = "query";
+	else
+		$kind = "N/A";
+	print "No data received. Did the $kind \"<b>".$_POST['tweet']."</b>\" correct?<br />Bug? Report at <a href='https://bugs.launchpad.net/dstwitt'>https://bugs.launchpad.net/dstwitt</a>";
 }else{
 	$i=0;
 	foreach($tweet->status as $t){
@@ -129,14 +159,21 @@ if(!$tweet->status){
 			print $t->user->screen_name.' <img src="/t/'.$t->id.'" />  ('.$ti.' | '.$client.')';
 		}
 		echo '<div class="actionbar">';
-		print '<a href="'.$fnpath.'?unfollow='.$t->user->id.'" onclick="return confirm(\'Unfollow?\')"><button>Unfollow</button></a>';
-		print '<a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
-		print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
-		print '<a href="#" onclick="ut(\''.$t->user->screen_name.'\'); return false;"><button>TL</button></a>';
-		if($t->favorited) print '<a href="'.$fnpath.'?unfav='.$t->id.'"><button><b>Faved</b></button></a>';
-		else print '<a href="'.$fnpath.'?fav='.$t->id.'"><button>Fave</button></a>';
+		if($t->user->id){
+			print '<a href="'.$fnpath.'?unfollow='.$t->user->id.'" onclick="return confirm(\'Unfollow?\')"><button>Unfollow</button></a>';
+			print '<a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
+			print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
+			print '<a href="#" onclick="ut(\''.$t->user->screen_name.'\'); return false;"><button>TL</button></a>';
+			if($t->favorited) print '<a href="'.$fnpath.'?unfav='.$t->id.'"><button><b>Faved</b></button></a>';
+			else print '<a href="'.$fnpath.'?fav='.$t->id.'"><button>Fave</button></a>';
+		}
 		if(preg_match("~http://twitpic.com/([^ ]+)~", $t->text, $twtpic)){
 			print " <a href='/twitpic/".$twtpic[1]."'>TwitPic</a> ";
+		}
+		if(preg_match_all("~#([^ \"]+)~", $t->text, $hashtag)){
+			foreach(array_unique($hashtag[0]) as $tag){
+				print " <a href='#' onclick='se(\"$tag\")'>$tag</a> ";
+			}
 		}
 		print '</div></li>';
 		flush();
