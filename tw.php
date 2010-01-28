@@ -133,6 +133,12 @@ if(!$_GET['norefresh']){
 }
 file_put_contents("cache", json_encode((array) $tweet));
 print "<b>".$tlname."</b>";
+// Parse clientdb.tsv
+$clientdb = array();
+foreach(split("\n", file_get_contents("clientdb.tsv")) as $i){
+	$i = split("\t", trim($i));
+	$clientdb[trim($i[0])] = trim($i[1]);
+}
 if(!$tweet->status){
 	if($_POST['act'] == "User timeline")
 		$kind = "username";
@@ -149,14 +155,13 @@ if(!$tweet->status){
 		print '<li onclick="actbar(this);">';
 		if($t->id == $lastupdate->id) print "<b>&gt;&gt;&gt;</b> ";
 		if($t->favorited) print "&#x2661;";
+		$client = strip_tags($t->source);
+		if($clientdb[$client]) $client .= " on <b>".$clientdb[$client]."</b>";
+		$ti = date("g:i:s A", strtotime($t->created_at));
 		if($_SESSION['ssr']){
-			$client = strip_tags($t->source);
-			$ti = date("g:i:s A", strtotime($t->created_at));
-			print $t->user->screen_name.' '.$t->text.' ('.$ti.' | '.$client.')';
+			print '<b>'.$t->user->screen_name.'</b> '.$t->text.' ('.$ti.' | '.$client.')';
 		}else{
-			$client = strip_tags($t->source);
-			$ti = date("g:i:s A", strtotime($t->created_at));
-			print $t->user->screen_name.' <img src="/t/'.$t->id.'" />  ('.$ti.' | '.$client.')';
+			print '<b>'.$t->user->screen_name.'</b> <img src="/t/'.$t->id.'" />  ('.$ti.' | '.$client.')';
 		}
 		echo '<div class="actionbar">';
 		if($t->user->id){
