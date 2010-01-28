@@ -3,7 +3,7 @@ define("CONSUMER_KEY", "TFehjBocpqYRsaUe92uKgA");
 define("CONSUMER_SECRET", "n1OHA5lwzNpFiM4PNrmpJLMHJQNInJ1JWkEtpvHc");
 $_conf = array();
 $_conf['blockedclients'] = array(
-	"foursquare"
+	"foursquare", "Playground"
 );
 $_conf['hideuser'] = array();
 $_conf['display'] = 10; //max = 20

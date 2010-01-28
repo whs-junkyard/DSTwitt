@@ -92,9 +92,11 @@ if($_POST['tweet'] && $_POST['act'] == "Tweet"){
 // img.php seems to malfunction without status object.
 // (of course I edited img.php. Also, the earlier version of DSTwitt that use saved password
 // use the old API and it put everything into the status key
+$nocaching = false;
 if(!$_GET['norefresh']){
 	if($_POST['act'] == "User timeline"){
 		$tweet = (object) array("status" => $tw->get("statuses/user_timeline", array("count" => 20, "screen_name" => $_POST['tweet'])));
+		$nocaching = true;
 	}else if($_GET['timeline'] == "replies"){
 		$tweet = (object) array("status" => $tw->get("statuses/mentions", array("count" => 20)));
 	}else if($_GET['timeline'] == "fav"){
@@ -105,37 +107,42 @@ if(!$_GET['norefresh']){
 }else{
 	$tweet = json_decode(file_get_contents("cache"));
 }
-file_put_contents("cache", json_encode((array) $tweet));
-$i=0;
-foreach($tweet->status as $t){
-	if(in_array(strip_tags($t->source), $_conf['blockedclients'])) continue;
-	if(in_array($t->user->screen_name, $_conf['hideuser'])) continue;
-	print '<li onclick="actbar(this);">';
-	if($t->id == $lastupdate->id) print "<b>&gt;&gt;&gt;</b> ";
-	if($t->favorited) print "&#x2661;";
-	if($_SESSION['ssr']){
-		$client = strip_tags($t->source);
-		$ti = date("g:i:s A", strtotime($t->created_at));
-		print $t->user->screen_name.' '.$t->text.' ('.$ti.' | '.$client.')';
-	}else{
-		$client = strip_tags($t->source);
-		$ti = date("g:i:s A", strtotime($t->created_at));
-		print $t->user->screen_name.' <img src="/t/'.$t->id.'" />  ('.$ti.' | '.$client.')';
+if(!$nocaching)
+	file_put_contents("cache", json_encode((array) $tweet));
+if(!$tweet->status){
+	print "No data received. Did the username \"<b>".$_POST['tweet']."</b>\" correct?<br />Bug? Report at <a href='https://bugs.launchpad.net/dstwitt'>https://bugs.launchpad.net/dstwitt</a>";
+}else{
+	$i=0;
+	foreach($tweet->status as $t){
+		if(in_array(strip_tags($t->source), $_conf['blockedclients'])) continue;
+		if(in_array($t->user->screen_name, $_conf['hideuser'])) continue;
+		print '<li onclick="actbar(this);">';
+		if($t->id == $lastupdate->id) print "<b>&gt;&gt;&gt;</b> ";
+		if($t->favorited) print "&#x2661;";
+		if($_SESSION['ssr']){
+			$client = strip_tags($t->source);
+			$ti = date("g:i:s A", strtotime($t->created_at));
+			print $t->user->screen_name.' '.$t->text.' ('.$ti.' | '.$client.')';
+		}else{
+			$client = strip_tags($t->source);
+			$ti = date("g:i:s A", strtotime($t->created_at));
+			print $t->user->screen_name.' <img src="/t/'.$t->id.'" />  ('.$ti.' | '.$client.')';
+		}
+		echo '<div class="actionbar">';
+		print '<a href="'.$fnpath.'?unfollow='.$t->user->id.'" onclick="return confirm(\'Unfollow?\')"><button>Unfollow</button></a>';
+		print '<a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
+		print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
+		print '<a href="#" onclick="ut(\''.$t->user->screen_name.'\'); return false;"><button>TL</button></a>';
+		if($t->favorited) print '<a href="'.$fnpath.'?unfav='.$t->id.'"><button><b>Faved</b></button></a>';
+		else print '<a href="'.$fnpath.'?fav='.$t->id.'"><button>Fave</button></a>';
+		if(preg_match("~http://twitpic.com/([^ ]+)~", $t->text, $twtpic)){
+			print " <a href='/twitpic/".$twtpic[1]."'>TwitPic</a> ";
+		}
+		print '</div></li>';
+		flush();
+		$i++;
+		if($i > $_conf['display']) break;
 	}
-	echo '<div class="actionbar">';
-	print '<a href="'.$fnpath.'?unfollow='.$t->user->id.'" onclick="return confirm(\'Unfollow?\')"><button>Unfollow</button></a>';
-	print '<a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
-	print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
-	print '<a href="#" onclick="ut(\''.$t->user->screen_name.'\'); return false;"><button>TL</button></a>';
-	if($t->favorited) print '<a href="'.$fnpath.'?unfav='.$t->id.'"><button><b>Faved</b></button></a>';
-	else print '<a href="'.$fnpath.'?fav='.$t->id.'"><button>Fave</button></a>';
-	if(preg_match("~http://twitpic.com/([^ ]+)~", $t->text, $twtpic)){
-		print " <a href='/twitpic/".$twtpic[1]."'>TwitPic</a> ";
-	}
-	print '</div></li>';
-	flush();
-	$i++;
-	if($i > $_conf['display']) break;
 }
 php?>
 </ul>
