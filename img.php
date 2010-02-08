@@ -19,7 +19,7 @@ $font_file  = './lucida.ttf' ;
 $font_size  = 11 ;
 $font_color = '#000000' ;
 $background_color = '#ffffff' ;
-$transparent_background  = true ;
+$transparent_background  = false;
 $cache_images = false ;
 $cache_folder = 'cache' ;
 
