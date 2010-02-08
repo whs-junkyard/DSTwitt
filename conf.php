@@ -7,6 +7,7 @@ $_conf['blockedclients'] = array(
 );
 $_conf['hideuser'] = array();
 $_conf['display'] = 10; //max = 20
+$_conf['sizzle'] = "selector.js"; // selector.js = class/id only; sizzle.js = css3, very slow
 
 // users parser
 $_user = (array) json_decode(file_get_contents("userdb"));

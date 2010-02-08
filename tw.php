@@ -17,7 +17,7 @@ try{
 $lastupdate = $oldtweet->status;
 $lastupdate = $lastupdate[0];
 php?>
-<script src="../<?php if($_GET['timeline']) print "../"; ?>sizzle.js"></script>
+<script src="../<?php if($_GET['timeline']) print "../"; ?><?=$_conf['sizzle']?>"></script>
 <style>
 body{font-family: sans-serif;}
 .g{color:gray;}
