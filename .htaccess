@@ -7,7 +7,7 @@ Order Deny,allow
 Deny from all
 </Files>
 RewriteEngine On
-RewriteBase /
+#RewriteBase /
 RewriteRule ^u/([^/]+)/([^/]+) tw.php?user=$1&timeline=$2 [L,QSA]
 RewriteRule ^u/([^/]+) tw.php?user=$1 [L,QSA]
 RewriteRule ^t/(.*) img.php?twid=$1 [L,QSA]
