@@ -55,7 +55,7 @@ if(get_magic_quotes_gpc())
 $text = javascript_to_html($text) ;*/
 $tweet = json_decode(file_get_contents("cache"));
 foreach($tweet->status as $v){
-	if($v->id == $_GET['twid']){
+	if($v->id_str == $_GET['twid']){
 		$t=$v;
 		break;
 	}

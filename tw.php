@@ -161,16 +161,16 @@ if(!$tweet->status){
 		if($_SESSION['ssr']){
 			print '<b>'.$t->user->screen_name.'</b> '.$t->text;
 		}else{
-			print '<b>'.$t->user->screen_name.'</b> <img src="/t/'.$t->id.'" />';
+			print '<b>'.$t->user->screen_name.'</b> <img src="/t/'.$t->id_str.'" />';
 		}
 		echo '<div class="actionbar">';
 		if($t->user->id){
 			print '<a href="'.$fnpath.'?unfollow='.$t->user->id.'" onclick="return confirm(\'Unfollow?\')"><button>Unfollow</button></a>';
-			print '<a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id.'); return false;"><button>@</button></a>';
-			print '<a href="'.$fnpath.'?rt='.$t->id.'"><button>RT</button></a>';
+			print '<a href="#" onclick="t(\''.$t->user->screen_name.'\', '.$t->id_str.'); return false;"><button>@</button></a>';
+			print '<a href="'.$fnpath.'?rt='.$t->id_str.'"><button>RT</button></a>';
 			print '<a href="#" onclick="ut(\''.$t->user->screen_name.'\'); return false;"><button>TL</button></a>';
-			if($t->favorited) print '<a href="'.$fnpath.'?unfav='.$t->id.'"><button><b>Faved</b></button></a>';
-			else print '<a href="'.$fnpath.'?fav='.$t->id.'"><button>Fave</button></a>';
+			if($t->favorited) print '<a href="'.$fnpath.'?unfav='.$t->id_str.'"><button><b>Faved</b></button></a>';
+			else print '<a href="'.$fnpath.'?fav='.$t->id_str.'"><button>Fave</button></a>';
 		}
 		print $ti.' | '.$client;
 		if(preg_match("~http://twitpic.com/([^ ]+)~", $t->text, $twtpic)){
