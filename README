@@ -1,15 +1,16 @@
-DSTwitt is a Twitter client for the Nintendo DS Browser.
+DSTwitt is a Twitter client designed for the Nintendo DS Browser but also can be used on WAP phones. It contains
+
+License: MIT
 
 Features
 
-- Battle tested
-- Fast & Responsive UI (at least more than m.twitter.com)
-- Use up-to-date API (at this time of writing)
-  - OAuth
-  - RT API
+- Battle tested (this was used as my classroom twitter client before I have a smartphone and also at เขาชนไก่)
+- Fast & Responsive UI (m.twitter.com)
 - Use image to work-around the lack of Thai support.
-  (of course you still can't tweet in Thai)
+  (you still can't tweet in Thai)
 - Support both SSR & Desktop mode.
-  (I suggests users to use Desktop mode. To switch to SSR text-only 
-  mode, switch the browser to SSR mode first then select the last link 
-  in the menu.)
+  (SSR mode must be toggled on when DS Browser is in SSR mode.
+  It disable text to image feature to allow content reflowing)
+
+2015 notes:
+- This is no longer maintained (but should be working)
